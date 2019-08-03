@@ -1,0 +1,99 @@
+import React, { useRef } from 'react';
+import { useDrag, useDrop } from 'react-dnd';
+import ItemTypes from './ItemTypes';
+import { List } from 'antd';
+
+const style = {
+  border: '1px dashed gray',
+  // padding: '0.5rem 1rem',
+  // marginBottom: '.5rem',
+  backgroundColor: 'white',
+  cursor: 'move'
+};
+
+const Card = ({ id, text, index, moveCard, data, onDrop }) => {
+  const ref = useRef(null);
+  // console.log('Card', data);
+  const [, drop] = useDrop({
+    accept: ItemTypes.CARD,
+    hover(item, monitor) {
+      if (!ref.current) {
+        return;
+      }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      const dragType = item.data.type;
+      const hoverType = data.type;
+      // monitor is DropTargetMonitor getItem 返回 drag 对象的 item
+
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex && dragType === hoverType) {
+        return;
+      }
+
+      // Determine rectangle on screen
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      // Get vertical middle
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      // Determine mouse position
+      const clientOffset = monitor.getClientOffset();
+      // Get pixels to the top
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+      // Only perform the move when the mouse has crossed half of the items height
+      // When dragging downwards, only move when the cursor is below 50%
+      // When dragging upwards, only move when the cursor is above 50%
+      // Dragging downwards
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+      // Dragging upwards
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+      // console.log('hover', index, item.data, data);
+      // 如果 type 不一样，则插入数组
+      // Time to actually perform the action
+      moveCard(dragIndex, hoverIndex, item.data);
+
+      // Note: we're mutating the monitor item here!
+      // Generally it's better to avoid mutations,
+      // but it's good here for the sake of performance
+      // to avoid expensive index searches.
+      item.index = hoverIndex;
+    },
+    drop(item) {
+      onDrop(item, index);
+    }
+    // drop(item, monitor) {
+    //   console.log('drop', index, item.data, data);
+    // }
+  });
+
+  const [{ isDragging }, drag] = useDrag({
+    item: { type: ItemTypes.CARD, id, index, data },
+    collect: monitor => ({
+      isDragging: monitor.isDragging()
+    }),
+    begin(monitor) {
+      // console.log('begin', data);
+    },
+    end(item, monitor) {
+      // console.log('end', item.data, data);
+    }
+  });
+
+  const opacity = isDragging ? 0 : 1;
+  drag(drop(ref));
+
+  return (
+    <li
+      className='ant-list-item ant-list-item-no-flex'
+      ref={ref}
+      style={{ ...style, opacity }}
+    >
+      {text}
+    </li>
+  );
+};
+export default Card;
