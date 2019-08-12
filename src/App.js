@@ -1,6 +1,7 @@
 import 'antd/dist/antd.css';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+// import ReactDOM from 'ReactDOM';
 // import logo from './logo.svg';
 import './App.css';
 import { List, Row, Col } from 'antd';
@@ -8,7 +9,7 @@ import { List, Row, Col } from 'antd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 
-import DragSourceWrapper from './DragSourceWrapper';
+// import DragSourceWrapper from './DragSourceWrapper';
 import Example from './Example';
 
 import update from 'immutability-helper';
@@ -70,49 +71,70 @@ function App() {
   // });
 
   const moveCard = useCallback(
-    type => (dragIndex, hoverIndex, dragData) => {
-      const hoverCards = cards[type];
-      const dragCard = hoverCards[dragIndex];
-      const hoverCard = hoverCards[hoverIndex];
+    (dragIndex, hoverIndex, dragType, hoverType) => {
+      const hoverCards = cards[hoverType];
+      const dragCards = cards[dragType];
+      const dragCard = dragCards[dragIndex];
+
+      console.log('moveCard', dragType, hoverType, dragIndex, hoverIndex);
 
       if (dragIndex < 0 || hoverIndex < 0) return;
 
-      let actions = [[dragIndex, 1], [hoverIndex, 0, dragCard]];
-
-      if (hoverCard.type !== dragData.type) {
-        // dragData = { ...dragData, type: hoverCard.type };
-        actions = [[hoverIndex, 0, dragData]];
-      }
-
-      // console.log('cardsqqq', data, hoverCards, dragCard.type, dragData.type);
       setCards({
         ...cards,
-        [type]: update(hoverCards, {
-          $splice: actions
-        })
+        ...(dragType === hoverType
+          ? {
+              [dragType]: update(dragCards, {
+                $splice: [[dragIndex, 1], [hoverIndex, 0, dragCard]]
+              })
+            }
+          : {
+              [dragType]: update(dragCards, {
+                $splice: [[dragIndex, 1]]
+              }),
+              [hoverType]: update(hoverCards, {
+                $splice: [[hoverIndex, 0, dragCard]]
+              })
+            })
       });
+
+      // if (dragType === hoverType) {
+      //   setCards({
+      //     ...cards,
+      //     [dragType]: update(dragCards, {
+      //       $splice: [[dragIndex, 1], [hoverIndex, 0, dragCard]]
+      //     })
+      //   });
+      // } else {
+      //   setCards({
+      //     ...cards,
+      //     [dragType]: update(dragCards, {
+      //       $splice: [[dragIndex, 1]]
+      //     }),
+      //     [hoverType]: update(hoverCards, {
+      //       $splice: [[hoverIndex, 0, dragData]]
+      //     })
+      //   });
+      // }
     },
     [cards]
   );
 
   const updateCard = useCallback(
-    type => (dragCard, dragIndex) => {
-      const hoverCards = cards[type];
-      const dragCards = cards[dragCard.type];
+    type => (hoverCard, dragType) => {
+      // const hoverCards = cards[type];
+      const dragCards = cards[dragType];
 
-      console.log('updateCard ', dragCard.type, type, dragIndex);
+      if (!dragType || dragType === type) return;
 
-      if (dragCard.type === type || dragIndex < 0) return;
-
-      const hoverIndex = hoverCards.findIndex(m => m.id === dragCard.id);
+      // 如果 type 不相同则是不同集合之间移动
+      // 此时要把原集合中的数据删除
+      const dragIndex = dragCards.findIndex(m => m.id === hoverCard.id);
 
       setCards(() => ({
         ...cards,
-        [type]: update(hoverCards, {
-          [hoverIndex]: { $set: { ...dragCard, type } }
-        }),
 
-        [dragCard.type]: update(dragCards, {
+        [dragType]: update(dragCards, {
           $splice: [[dragIndex, 1]]
         })
       }));
@@ -127,22 +149,12 @@ function App() {
         <div className='app' style={{ margin: 60 }}>
           <Row gutter={16}>
             <Col md={6}>
-              <Example
-                cards={cards}
-                moveCard={moveCard(1)}
-                updateCard={updateCard(1)}
-                type={1}
-              />
+              <Example cards={cards} moveCard={moveCard} type={1} />
             </Col>
             <Col md={6}>
-              <Example
-                cards={cards}
-                moveCard={moveCard(2)}
-                updateCard={updateCard(2)}
-                type={2}
-              />
+              <Example cards={cards} moveCard={moveCard} type={2} />
             </Col>
-            <Col md={6}>1</Col>
+            <Col md={6}>{/* <button onClick={_onPrint}>Print</button> */}</Col>
             <Col md={6}>1</Col>
           </Row>
         </div>

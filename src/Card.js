@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import ItemTypes from './ItemTypes';
-import { List } from 'antd';
 
 const style = {
   border: '1px dashed gray',
@@ -25,7 +24,7 @@ const Card = ({ id, text, index, moveCard, data, onDrop }) => {
       const dragType = item.data.type;
       const hoverType = data.type;
       // monitor is DropTargetMonitor getItem 返回 drag 对象的 item
-
+      // console.log(item.id, id, item.id === id);
       // Don't replace items with themselves
       if (dragIndex === hoverIndex && dragType === hoverType) {
         return;
@@ -52,18 +51,20 @@ const Card = ({ id, text, index, moveCard, data, onDrop }) => {
         return;
       }
       // console.log('hover', index, item.data, data);
-      // 如果 type 不一样，则插入数组
+
       // Time to actually perform the action
-      moveCard(dragIndex, hoverIndex, item.data);
+      // console.log('index,index', item.index, hoverIndex);
+      moveCard(dragIndex, hoverIndex, dragType, hoverType);
 
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
       // but it's good here for the sake of performance
       // to avoid expensive index searches.
       item.index = hoverIndex;
+      item.data.type = hoverType;
     },
     drop(item) {
-      onDrop(item, index);
+      // onDrop(item, item.originType);
     }
     // drop(item, monitor) {
     //   console.log('drop', index, item.data, data);
