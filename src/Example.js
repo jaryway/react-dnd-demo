@@ -7,6 +7,7 @@ import Card from './Card';
 
 const Container = ({ cards, moveCard, type }) => {
   {
+
     const renderCard = (card, index) => {
       return (
         <Card
@@ -24,7 +25,7 @@ const Container = ({ cards, moveCard, type }) => {
       <List
         size='small'
         bordered
-        dataSource={cards[type]}
+        dataSource={cards[type].length ? cards[type] : [{ type }]}
         renderItem={(card, i) => renderCard(card, i)}
       />
     );

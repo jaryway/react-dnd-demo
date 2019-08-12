@@ -10,7 +10,7 @@ const style = {
   cursor: 'move'
 };
 
-const Card = ({ id, text, index, moveCard, data, onDrop }) => {
+const Card = ({ id, text, index, moveCard, data }) => {
   const ref = useRef(null);
   // console.log('Card', data);
   const [, drop] = useDrop({

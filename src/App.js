@@ -120,28 +120,6 @@ function App() {
     [cards]
   );
 
-  const updateCard = useCallback(
-    type => (hoverCard, dragType) => {
-      // const hoverCards = cards[type];
-      const dragCards = cards[dragType];
-
-      if (!dragType || dragType === type) return;
-
-      // 如果 type 不相同则是不同集合之间移动
-      // 此时要把原集合中的数据删除
-      const dragIndex = dragCards.findIndex(m => m.id === hoverCard.id);
-
-      setCards(() => ({
-        ...cards,
-
-        [dragType]: update(dragCards, {
-          $splice: [[dragIndex, 1]]
-        })
-      }));
-    },
-    [cards]
-  );
-
   return (
     <>
       {/* <Form /> */}
