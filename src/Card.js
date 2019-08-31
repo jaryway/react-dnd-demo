@@ -24,11 +24,13 @@ const Card = ({ id, text, index, moveCard, data }) => {
       const dragType = item.data.type;
       const hoverType = data.type;
       // monitor is DropTargetMonitor getItem 返回 drag 对象的 item
-      // console.log(item.id, id, item.id === id);
+      console.log(90909, dragIndex === hoverIndex, JSON.stringify({dragType, hoverType}));
       // Don't replace items with themselves
       if (dragIndex === hoverIndex && dragType === hoverType) {
         return;
       }
+
+      if (dragType !== hoverType && dragType === 'dest') return;
 
       // Determine rectangle on screen
       const hoverBoundingRect = ref.current.getBoundingClientRect();

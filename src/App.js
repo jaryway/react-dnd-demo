@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 // import ReactDOM from 'ReactDOM';
 // import logo from './logo.svg';
 import './App.css';
-import { List, Row, Col } from 'antd';
+import { Row, Col, Tabs } from 'antd';
 
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
@@ -61,8 +61,28 @@ const data = {
   })
 };
 
+const _copyList = {
+  source: new Array(8).fill(0).map(() => {
+    const id = newId();
+    return {
+      id,
+      text: id,
+      type: 'source'
+    };
+  }),
+  dest: new Array(8).fill(0).map(() => {
+    const id = newId();
+    return {
+      id,
+      text: id,
+      type: 'dest'
+    };
+  })
+};
+
 function App() {
   const [cards, setCards] = useState(data);
+  const [copyList, setLists] = useState(_copyList);
   // const cardsRef = useRef();
 
   // useEffect(() => {
@@ -79,6 +99,11 @@ function App() {
       console.log('moveCard', dragType, hoverType, dragIndex, hoverIndex);
 
       if (dragIndex < 0 || hoverIndex < 0) return;
+
+      /**
+       * 如果类型一样，则排序
+       * 不一样则，一个删除，一个插入
+       */
 
       setCards({
         ...cards,
@@ -97,44 +122,115 @@ function App() {
               })
             })
       });
-
-      // if (dragType === hoverType) {
-      //   setCards({
-      //     ...cards,
-      //     [dragType]: update(dragCards, {
-      //       $splice: [[dragIndex, 1], [hoverIndex, 0, dragCard]]
-      //     })
-      //   });
-      // } else {
-      //   setCards({
-      //     ...cards,
-      //     [dragType]: update(dragCards, {
-      //       $splice: [[dragIndex, 1]]
-      //     }),
-      //     [hoverType]: update(hoverCards, {
-      //       $splice: [[hoverIndex, 0, dragData]]
-      //     })
-      //   });
-      // }
     },
     [cards]
   );
+
+  const copyCard = useCallback(
+    (dragIndex, hoverIndex, dragType, hoverType) => {
+      const hoverCards = copyList[hoverType];
+      const dragCards = copyList[dragType];
+      const dragCard = dragCards[dragIndex];
+
+      console.log(
+        'copyCard',
+        dragCard.id,
+        dragType,
+        hoverType,
+        dragIndex,
+        hoverIndex
+      );
+
+      if (dragIndex < 0 || hoverIndex < 0) return;
+
+      /**
+       * 如果类型一样，则排序
+       * 不一样则，一个删除，一个插入
+       */
+
+      // 如果是放到 dest
+      // if (dragType === 'dest') return;
+
+      setLists({
+        ...copyList,
+        ...(dragType === hoverType
+          ? {
+              ...(hoverType === 'dest'
+                ? {
+                    [dragType]: update(dragCards, {
+                      $splice: [[dragIndex, 1], [hoverIndex, 0, dragCard]]
+                    })
+                  }
+                : {})
+            }
+          : {
+              [dragType]: update(dragCards, {
+                [dragIndex]: o => ({ ...o, type: 'source' })
+              }),
+              ...(hoverType === 'dest'
+                ? {
+                    [hoverType]: update(hoverCards, {
+                      $splice: [
+                        [
+                          hoverIndex,
+                          0,
+                          { ...dragCard, id: newId(), type: hoverType }
+                        ]
+                      ]
+                    })
+                  }
+                : {})
+            })
+      });
+    },
+    [copyList]
+  );
+
+  console.log('cards', cards[1]);
 
   return (
     <>
       {/* <Form /> */}
       <DndProvider backend={HTML5Backend}>
-        <div className='app' style={{ margin: 60 }}>
-          <Row gutter={16}>
-            <Col md={6}>
-              <Example cards={cards} moveCard={moveCard} type={1} />
-            </Col>
-            <Col md={6}>
-              <Example cards={cards} moveCard={moveCard} type={2} />
-            </Col>
-            <Col md={6}>{/* <button onClick={_onPrint}>Print</button> */}</Col>
-            <Col md={6}>1</Col>
-          </Row>
+        <div className='app' style={{ margin: '24px auto', maxWidth: 900 }}>
+          <Tabs defaultActiveKey='1'>
+            <Tabs.TabPane tab='Two Lists' key='1'>
+              <Row gutter={16}>
+                <Col md={6}>
+                  <Example cards={cards} moveCard={moveCard} type={1} />
+                </Col>
+                <Col md={6}>
+                  <Example cards={cards} moveCard={moveCard} type={2} />
+                </Col>
+                <Col md={6}>
+                  <pre>{JSON.stringify(cards[1], null, 2)}</pre>
+                </Col>
+                <Col md={6}>
+                  <pre>{JSON.stringify(cards[2], null, 1)}</pre>
+                </Col>
+              </Row>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='Clone' key='2'>
+              <Row gutter={16}>
+                <Col md={6}>
+                  <Example
+                    cards={copyList}
+                    moveCard={copyCard}
+                    type={'source'}
+                  />
+                </Col>
+                <Col md={6}>
+                  <Example cards={copyList} moveCard={copyCard} type={'dest'} />
+                </Col>
+                <Col md={6}>
+                  <pre>{JSON.stringify(copyList['source'], null, 2)}</pre>
+                </Col>
+                <Col md={6}>
+                  <pre>{JSON.stringify(copyList['dest'], null, 1)}</pre>
+                </Col>
+              </Row>
+            </Tabs.TabPane>
+          </Tabs>
         </div>
       </DndProvider>
     </>
