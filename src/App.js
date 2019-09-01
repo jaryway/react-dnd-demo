@@ -70,7 +70,7 @@ const _copyList = {
       type: 'source'
     };
   }),
-  dest: new Array(8).fill(0).map(() => {
+  dest: new Array(0).fill(0).map(() => {
     const id = newId();
     return {
       id,
@@ -144,12 +144,11 @@ function App() {
       if (dragIndex < 0 || hoverIndex < 0) return;
 
       /**
-       * 如果类型一样，则排序
-       * 不一样则，一个删除，一个插入
+       * 只有 dragType === hoverType 和 dest => source 才会进入这里
+       * 如果是 dragType === hoverType，则只排序 dest, source 无需排序
+       * 如果是 dest => source, 因为在 card 中把两者的 type 设为了一样，
+       * 所以要把 dragCard 的 type 改回 source，同时给 hoverCard 一个新的ID
        */
-
-      // 如果是放到 dest
-      // if (dragType === 'dest') return;
 
       setLists({
         ...copyList,
@@ -186,7 +185,7 @@ function App() {
     [copyList]
   );
 
-  console.log('cards', cards[1]);
+  // console.log('cards', cards[1]);
 
   return (
     <>
@@ -229,6 +228,9 @@ function App() {
                   <pre>{JSON.stringify(copyList['dest'], null, 1)}</pre>
                 </Col>
               </Row>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='Nested' key='3'>
+              Nested
             </Tabs.TabPane>
           </Tabs>
         </div>
