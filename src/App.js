@@ -5,6 +5,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 // import logo from './logo.svg';
 import './App.css';
 import { Row, Col, Tabs } from 'antd';
+import Tree from 'antd/lib/tree'
 
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
@@ -21,6 +22,50 @@ import update from 'immutability-helper';
 //   'Man charged over missing wedding girl.',
 //   'Los Angeles battles huge wildfires.'
 // ];
+const treeData = [
+  {
+    title: '0-0',
+    key: '0-0',
+    children: [
+      {
+        title: '0-0-0',
+        key: '0-0-0',
+        children: [
+          { title: '0-0-0-0', key: '0-0-0-0' },
+          { title: '0-0-0-1', key: '0-0-0-1' },
+          { title: '0-0-0-2', key: '0-0-0-2' }
+        ]
+      },
+      {
+        title: '0-0-1',
+        key: '0-0-1',
+        children: [
+          { title: '0-0-1-0', key: '0-0-1-0' },
+          { title: '0-0-1-1', key: '0-0-1-1' },
+          { title: '0-0-1-2', key: '0-0-1-2' }
+        ]
+      },
+      {
+        title: '0-0-2',
+        key: '0-0-2'
+      }
+    ]
+  },
+  {
+    title: '0-1',
+    key: '0-1',
+    children: [
+      { title: '0-1-0-0', key: '0-1-0-0' },
+      { title: '0-1-0-1', key: '0-1-0-1' },
+      { title: '0-1-0-2', key: '0-1-0-2' }
+    ]
+  },
+  {
+    title: '0-2',
+    key: '0-2'
+  }
+];
+
 const data1 = [
   { id: 1, text: 'Write a cool JS library' },
   { id: 2, text: 'Make it generic enough' },
@@ -235,6 +280,14 @@ function App() {
           </Tabs>
         </div>
       </DndProvider>
+
+      <Tree
+        showIcon
+        defaultExpandAll
+        defaultSelectedKeys={['0-0-0']}
+        treeData={treeData}
+        // switcherIcon={<Icon type="down" />}
+      ></Tree>
     </>
   );
 }
