@@ -4,16 +4,18 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 // import ReactDOM from 'ReactDOM';
 // import logo from './logo.svg';
 import './App.css';
-import { Row, Col, Tabs } from 'antd';
-import Tree from 'antd/lib/tree'
+// import './App.less';
+import update from 'immutability-helper';
+import { Row, Col, Tabs, Icon } from 'antd';
+import Tree from 'antd/lib/tree';
 
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
 
 // import DragSourceWrapper from './DragSourceWrapper';
 import Example from './Example';
+import Nested from './nested'
 
-import update from 'immutability-helper';
 
 // const data = [
 //   'Racing car sprays burning fuel into crowd.',
@@ -239,7 +241,7 @@ function App() {
         <div className='app' style={{ margin: '24px auto', maxWidth: 900 }}>
           <Tabs defaultActiveKey='1'>
             <Tabs.TabPane tab='Two Lists' key='1'>
-              <Row gutter={16}>
+              <Row gutter={16} style={{ marginLeft: '0', marginRight: 0 }}>
                 <Col md={6}>
                   <Example cards={cards} moveCard={moveCard} type={1} />
                 </Col>
@@ -255,7 +257,7 @@ function App() {
               </Row>
             </Tabs.TabPane>
             <Tabs.TabPane tab='Clone' key='2'>
-              <Row gutter={16}>
+              <Row gutter={2}>
                 <Col md={6}>
                   <Example
                     cards={copyList}
@@ -275,19 +277,54 @@ function App() {
               </Row>
             </Tabs.TabPane>
             <Tabs.TabPane tab='Nested' key='3'>
-              Nested
+              <Nested className='grid-widget'>
+                <Row gutter={2}>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                </Row>
+              </Nested>
+              <div className='grid-widget selected'>
+                <div className='grid-widget-drag'>
+                  <Icon type='drag'></Icon>
+                </div>
+                <Row gutter={2}>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                </Row>
+              </div>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='Tree' key={4}>
+              <Tree
+                showIcon
+                defaultExpandAll
+                defaultSelectedKeys={['0-0-0']}
+                treeData={treeData}
+                // switcherIcon={<Icon type="down" />}
+              ></Tree>
             </Tabs.TabPane>
           </Tabs>
         </div>
       </DndProvider>
-
-      <Tree
-        showIcon
-        defaultExpandAll
-        defaultSelectedKeys={['0-0-0']}
-        treeData={treeData}
-        // switcherIcon={<Icon type="down" />}
-      ></Tree>
     </>
   );
 }
