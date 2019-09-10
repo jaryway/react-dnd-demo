@@ -1,70 +1,58 @@
-import React, { useRef, Children } from 'react';
+import React, { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
 import ItemTypes from '../ItemTypes';
 
-const style = {
-  border: '1px dashed gray',
-  // padding: '0.5rem 1rem',
-  // marginBottom: '.5rem',
-  backgroundColor: 'white',
-  cursor: 'move'
-};
+// const style = {
+//   border: '1px dashed gray',
+//   // padding: '0.5rem 1rem',
+//   // marginBottom: '.5rem',
+//   backgroundColor: 'white',
+//   cursor: 'move'
+// };
 
-const WidgetWrapper = ({ id, text, index, moveCard, data, children }) => {
+const WidgetWrapper = ({ index, data, moveCard }) => {
   const ref = useRef(null);
   // console.log('WidgetWrapper', data);
+
+  const { id, text, pid } = data;
+
   const [, drop] = useDrop({
     accept: ItemTypes.CARD,
     hover(item, monitor) {
-      if (!ref.current) {
-        return;
-      }
+      const isOver = monitor.isOver({ shallow: true });
+
+      // console.log('hover-Widget', item, isOver);
+
+      if (!isOver) return;
+
+      if (!ref.current) return;
+
       const dragIndex = item.index;
       const hoverIndex = index;
-      const dragType = item.data.type;
-      const hoverType = data.type;
+      const dragId = item.data.id;
+      const hoverId = id;
+      const dragType = item.data.pid;
+      const hoverType = pid;
+      const dragCard = item.data;
+      const hoverCard = data;
       // monitor is DropTargetMonitor getItem 返回 drag 对象的 item
-      // console.log(90909, dragIndex === hoverIndex, JSON.stringify({dragType, hoverType}));
+      // console.log(90909, dragIndex === hoverIndex);
       // Don't replace items with themselves
-      if (dragIndex === hoverIndex && dragType === hoverType) {
-        return;
-      }
+      if (dragIndex === hoverIndex && dragType === hoverType) return;
 
-      if (dragType !== hoverType && dragType === 'dest') return;
-
-      // Determine rectangle on screen
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
-      // Get vertical middle
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      // Determine mouse position
-      const clientOffset = monitor.getClientOffset();
-      // Get pixels to the top
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
-      // Dragging downwards
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      // Dragging upwards
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
       // console.log('hover', index, item.data, data);
 
       // Time to actually perform the action
       // console.log('index,index', item.index, hoverIndex);
-      moveCard(dragIndex, hoverIndex, dragType, hoverType);
+      moveCard(dragIndex, hoverIndex, dragId, hoverId, dragCard, hoverCard);
 
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
       // but it's good here for the sake of performance
       // to avoid expensive index searches.
       item.index = hoverIndex;
-      item.data.type = hoverType;
+      item.data.pid = hoverType;
     },
     drop(item) {
       // onDrop(item, item.originType);
@@ -75,7 +63,7 @@ const WidgetWrapper = ({ id, text, index, moveCard, data, children }) => {
   });
 
   const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.CARD, id, index, data },
+    item: { type: ItemTypes.CARD, index, data },
     collect: monitor => ({
       isDragging: monitor.isDragging()
     }),
@@ -92,7 +80,7 @@ const WidgetWrapper = ({ id, text, index, moveCard, data, children }) => {
 
   return (
     <div className='grid-widget-item' ref={ref}>
-      Column
+      {text}
     </div>
   );
 };

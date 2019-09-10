@@ -239,7 +239,7 @@ function App() {
       {/* <Form /> */}
       <DndProvider backend={HTML5Backend}>
         <div className='app' style={{ margin: '24px auto', maxWidth: 900 }}>
-          <Tabs defaultActiveKey='1'>
+          <Tabs defaultActiveKey='3'>
             <Tabs.TabPane tab='Two Lists' key='1'>
               <Row gutter={16} style={{ marginLeft: '0', marginRight: 0 }}>
                 <Col md={6}>

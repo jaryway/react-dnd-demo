@@ -13,19 +13,34 @@ const style = {
   cursor: 'move'
 };
 
-const GridWrapper = ({ id, text, index, moveCard, data }) => {
+const GridWrapper = ({ index, data, moveCard }) => {
   const ref = useRef(null);
+  const dragRef = useRef(null);
   // console.log('RowWrapper', data);
+  const { id, text, pid } = data;
+
   const [, drop] = useDrop({
     accept: ItemTypes.CARD,
+
+    /**
+     *
+     * @param {Object} item Returns a plain object representing the currently dragged item.
+     * @param {DropTargetMonitor} monitor
+     */
     hover(item, monitor) {
+      const isOver = monitor.isOver({ shallow: true });
+      // console.log('hover-Grid', item, isOver);
+      if (!isOver) return;
+      // const { id, text, pid } = data;
       if (!ref.current) {
         return;
       }
       const dragIndex = item.index;
       const hoverIndex = index;
-      const dragType = item.data.type;
-      const hoverType = data.type;
+      const dragType = item.data.pid;
+      const hoverType = pid;
+      // return;
+      // item is drag item
       // monitor is DropTargetMonitor getItem 返回 drag 对象的 item
       // console.log(90909, dragIndex === hoverIndex, JSON.stringify({dragType, hoverType}));
       // Don't replace items with themselves
@@ -66,7 +81,7 @@ const GridWrapper = ({ id, text, index, moveCard, data }) => {
       // but it's good here for the sake of performance
       // to avoid expensive index searches.
       item.index = hoverIndex;
-      item.data.type = hoverType;
+      item.data.pid = hoverType;
     },
     drop(item) {
       // onDrop(item, item.originType);
@@ -90,26 +105,27 @@ const GridWrapper = ({ id, text, index, moveCard, data }) => {
   });
 
   const opacity = isDragging ? 0 : 1;
-  drag(drop(ref));
+  drop(dragRef);
+  drag(dragRef);
+
+  const { elements } = data;
 
   return (
-    <div className='grid-widget selected' ref={ref}>
-      <div className='grid-widget-drag'>
+    <div className='grid-widget' ref={ref} title={text}>
+      <div className='grid-widget-drag' ref={dragRef}>
         <Icon type='drag'></Icon>
       </div>
       <Row gutter={2}>
-        <Col span={6}>
-          <WidgetWrapper>Column</WidgetWrapper>
-        </Col>
-        <Col span={6}>
-          <WidgetWrapper>Column</WidgetWrapper>
-        </Col>
-        <Col span={6}>
-          <WidgetWrapper>Column</WidgetWrapper>
-        </Col>
-        <Col span={6}>
-          <WidgetWrapper>Column</WidgetWrapper>
-        </Col>
+        {elements.map((item, index) => {
+          // const { id, text } = item;
+          return (
+            <Col span={6} key={item.id}>
+              <WidgetWrapper
+                {...{ key: item.id, index, data: item, moveCard }}
+              />
+            </Col>
+          );
+        })}
       </Row>
     </div>
   );
