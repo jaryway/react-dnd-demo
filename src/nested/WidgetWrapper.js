@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
 import ItemTypes from '../ItemTypes';
+import DragTypes from '../DragTypes';
 
 // const style = {
 //   border: '1px dashed gray',
@@ -11,6 +12,7 @@ import ItemTypes from '../ItemTypes';
 //   cursor: 'move'
 // };
 function canDrop(dragItem, data) {
+  if (['grid'].includes(dragItem.data.type)) return false;
   const isEmpty = data.type === '__empty__';
   // 如果当前是 empty 组件，则可以放入任意组件
   if (isEmpty) return true;
@@ -20,9 +22,8 @@ function canDrop(dragItem, data) {
 
 const WidgetWrapper = ({ index, data, moveCard, updateCard }) => {
   const ref = useRef(null);
-  // console.log('WidgetWrapper', data);
 
-  const { id, name, pid, _hidden } = data;
+  const { id, name, pid } = data;
 
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
@@ -67,15 +68,16 @@ const WidgetWrapper = ({ index, data, moveCard, updateCard }) => {
     },
     drop(item) {
       console.log('drop', item);
-      // updateCard();
+      updateCard();
     }
     // canDrop(item, monitor) {
     //   return canDrop(item, data);
     // }
   });
 
+  const dragItem = { id, index, data };
   const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.CARD, id, index, data },
+    item: { ...dragItem, type: ItemTypes.CARD, dragType: DragTypes.GRID_COL },
     collect: monitor => ({
       isDragging: monitor.isDragging()
     }),

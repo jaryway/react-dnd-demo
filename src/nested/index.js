@@ -1,22 +1,22 @@
 import React, { useState, useCallback } from 'react';
 // import GridWrapper from './GridWrapper';
-import { Row, Col } from 'antd';
+// import { Row, Col } from 'antd';
 import update from 'immutability-helper';
 import GridWrapper from './GridWrapper';
 import { Button } from 'antd/lib/radio';
 
-var list = [
-  { id: '0-0-0', cols: 3, pid: '0', text: '0-0-0' },
-  { id: '0-0-0-1', pid: '0-0-0', text: '0-0-0-1' },
+// var list = [
+//   { id: '0-0-0', cols: 3, pid: '0', text: '0-0-0' },
+//   { id: '0-0-0-1', pid: '0-0-0', text: '0-0-0-1' },
 
-  { id: '0-0-0-0', pid: '0-0-0', text: '0-0-0-0' },
-  { id: '0-0-0-2', pid: '0-0-0', text: '0-0-0-2' },
-  { id: '0-0-1', cols: 4, pid: '0', text: '0-0-1' },
-  //   { id: '0-0', text: '0-0' },
-  { id: '0-0-1-0', pid: '0-0-1', text: '0-0-1-0' },
-  { id: '0-0-1-1', pid: '0-0-1', text: '0-0-1-1' },
-  { id: '0-0-1-2', pid: '0-0-1', text: '0-0-1-2' }
-];
+//   { id: '0-0-0-0', pid: '0-0-0', text: '0-0-0-0' },
+//   { id: '0-0-0-2', pid: '0-0-0', text: '0-0-0-2' },
+//   { id: '0-0-1', cols: 4, pid: '0', text: '0-0-1' },
+//   //   { id: '0-0', text: '0-0' },
+//   { id: '0-0-1-0', pid: '0-0-1', text: '0-0-1-0' },
+//   { id: '0-0-1-1', pid: '0-0-1', text: '0-0-1-1' },
+//   { id: '0-0-1-2', pid: '0-0-1', text: '0-0-1-2' }
+// ];
 
 const rawData = [
   {
@@ -52,18 +52,18 @@ const rawData = [
     cols: 3,
     elements: [
       {
-        id: '1874',
-        pid: '187',
-        type: 'input',
-        name: '单行文本33'
-        // icon: 'icon-input'
-      },
-      {
         id: '1855',
         pid: '187',
         type: '__empty__',
         name: '__empty__',
         icon: 'icon-input'
+      },
+      {
+        id: '1874',
+        pid: '187',
+        type: 'input',
+        name: '单行文本33'
+        // icon: 'icon-input'
       },
       {
         id: '1876',
@@ -125,8 +125,8 @@ function buildCommand(pos, action) {
   }, {});
 }
 
-(function testBuilCommand() {
-  return;
+function testBuilCommand() {
+  // return;
   var data = [
     {
       id: '0',
@@ -200,7 +200,7 @@ function buildCommand(pos, action) {
   data = update(data, command1);
   data = update(data, command2);
   //   console.log('testBuildCommand', JSON.stringify(data, null, 2));
-})();
+}
 
 const keyPositions = rawData2KeyPos(rawData);
 
@@ -209,6 +209,7 @@ const keyPositions = rawData2KeyPos(rawData);
 function Nested({ data }) {
   const [cards, setCards] = useState(rawData);
   const [keyPos, setKeyPos] = useState(keyPositions);
+  const [selectMap, setSelectCard] = useState({});
   //   treeData2KeyPos(treeData)
   const switchCard = () => {
     // const dragParentCard = cards[0];
@@ -217,13 +218,19 @@ function Nested({ data }) {
     const dragCard = cards[0].elements[1];
     const hoverCard = cards[1].elements[1];
 
-    const nextDragCard = { ...hoverCard, pid: dragCard.pid };
-    const nextHoverCard = { ...dragCard, pid: hoverCard.pid };
+    const nextDragCard = {
+      ...hoverCard,
+      pid: dragCard.pid /*id: dragCard.id*/
+    };
+    const nextHoverCard = {
+      ...dragCard,
+      pid: hoverCard.pid /*id: hoverCard.id */
+    };
 
     const nextCards = update(cards, {
       0: {
         elements: {
-          [2]: { $merge: { _hidden: true } },
+          // [2]: { $merge: { _hidden: true } },
           $splice: [[1, 1, nextDragCard]]
         }
       },
@@ -240,7 +247,11 @@ function Nested({ data }) {
     setCards(nextCards);
     setKeyPos(nextKeyPos);
   };
+  const selectCard = id => {
+    setSelectCard(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
+  //  更新卡片—— 移除 带有 _hidden 的项
   const updateCard = () => {
     const nextCards = updateData(cards);
     const nextKeyPos = rawData2KeyPos(nextCards);
@@ -259,23 +270,12 @@ function Nested({ data }) {
       const hoverParentIsGrid = cards[hoverPos[0]].type === 'grid';
       const hoverIsEmpty = hoverParentIsGrid && hoverCard.type === '__empty__';
 
-      // note：不能在 hover 是不能删除元素，否则会报 Expected to find a valid target. 错误，
+      // 注意：元素被 hover 时不能被删除，否则会报 Expected to find a valid target. 错误，
 
       const dragCommand = buildCommand(dragPos, i => {
         // 如果父级是 grid 组件，drag 过去之后要补一个 empty 对象
         const needInsertEmpty = dragParentIsGrid && hoverIsEmpty;
-        // const emptyCard = {
-        //   // ...hoverCard,
-        //   pid: dragCard.pid,
-        //   id: dragCard.id,
-        //   type: '__empty__',
-        //   name: '__empty__'
-        // };
         const emptyCard = empty(dragCard.pid);
-        // console.log(
-        //   'dragCard|hoverCard',
-        //   ...(needInsertEmpty ? [emptyCard] : [])
-        // );
         return {
           $splice: [[i, 1, ...(needInsertEmpty ? [emptyCard] : [])]]
         };
@@ -293,9 +293,9 @@ function Nested({ data }) {
         };
       });
 
-      let nextCards = update(cards, dragCommand);
+      const nextCards = update(update(cards, dragCommand), hoverCommand);
       // if (hoverIsEmpty) nextCards = update(nextCards, hoverCommand1);
-      nextCards = update(nextCards, hoverCommand);
+      // nextCards = update(nextCards, hoverCommand);
       const nextKeyPos = rawData2KeyPos(nextCards);
 
       setCards(nextCards);
@@ -305,7 +305,8 @@ function Nested({ data }) {
     },
     [cards, keyPos]
   );
-  console.log('nextCardsnextCards', keyPos, cards);
+
+  // console.log('nextCardsnextCards', keyPos, cards);
   return (
     <>
       {cards.map((item, index) => {
@@ -313,10 +314,18 @@ function Nested({ data }) {
           return (
             <GridWrapper
               key={item.id}
-              {...{ index, data: item, moveCard, updateCard }}
+              {...{
+                index,
+                data: item,
+                moveCard,
+                updateCard,
+                selectMap,
+                selectCard
+              }}
             ></GridWrapper>
           );
         }
+        return null;
       })}
       <div style={{ textAlign: 'center' }}>
         <Button
