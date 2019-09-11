@@ -18,14 +18,17 @@ function canDrop(dragItem, data) {
   return data.pid === dragItem.data.pid;
 }
 
-const WidgetWrapper = ({ index, data, moveCard }) => {
+const WidgetWrapper = ({ index, data, moveCard, updateCard }) => {
   const ref = useRef(null);
   // console.log('WidgetWrapper', data);
 
-  const { id, name, pid } = data;
+  const { id, name, pid, _hidden } = data;
 
-  const [, drop] = useDrop({
+  const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
+    collect: monitor => ({
+      isOver: monitor.isOver({ shallow: true })
+    }),
     hover(item, monitor) {
       const isOver = monitor.isOver({ shallow: true });
 
@@ -64,6 +67,7 @@ const WidgetWrapper = ({ index, data, moveCard }) => {
     },
     drop(item) {
       console.log('drop', item);
+      // updateCard();
     }
     // canDrop(item, monitor) {
     //   return canDrop(item, data);
@@ -75,12 +79,12 @@ const WidgetWrapper = ({ index, data, moveCard }) => {
     collect: monitor => ({
       isDragging: monitor.isDragging()
     }),
-    begin(monitor) {
-      // console.log('begin', data);
-    },
-    end(item, monitor) {
-      // console.log('end', item.data, data);
-    },
+    // begin(monitor) {
+    //   // console.log('begin', data);
+    // },
+    // end(item, monitor) {
+    //   // console.log('end', item.data, data);
+    // },
     canDrag(monitor) {
       // empty 组件不能拖拽
       return data.type !== '__empty__';
@@ -89,6 +93,8 @@ const WidgetWrapper = ({ index, data, moveCard }) => {
 
   // const opacity = isDragging ? 0 : 1;
   drag(drop(ref));
+
+  // console.log(isOvering, 'collectedProps');
 
   return (
     <div className='grid-widget-item' ref={ref}>

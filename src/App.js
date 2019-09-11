@@ -293,7 +293,7 @@ function App() {
                   </Col>
                 </Row>
               </Nested>
-              <div className='grid-widget selected'>
+              {/* <div className='grid-widget selected'>
                 <div className='grid-widget-drag'>
                   <Icon type='drag'></Icon>
                 </div>
@@ -311,7 +311,7 @@ function App() {
                     <div>Column</div>
                   </Col>
                 </Row>
-              </div>
+              </div> */}
             </Tabs.TabPane>
             <Tabs.TabPane tab='Tree' key={4}>
               <Tree

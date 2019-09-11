@@ -13,7 +13,7 @@ const style = {
   cursor: 'move'
 };
 
-const GridWrapper = ({ index, data, moveCard }) => {
+const GridWrapper = ({ index, data, moveCard, updateCard }) => {
   const ref = useRef(null);
   const dragRef = useRef(null);
   // console.log('RowWrapper', data);
@@ -42,16 +42,21 @@ const GridWrapper = ({ index, data, moveCard }) => {
   // const { elements, cols } = data;
 
   return (
-    <div key={id} className='grid-widget' ref={ref} title={text}>
+    <div key={id} className='grid-widget' ref={ref}>
       <div className='grid-widget-drag' ref={dragRef}>
         <Icon type='drag'></Icon>
       </div>
       <Row gutter={2}>
         {elements.map((item, index) => {
+          // if (item._hidden) return null;
           return (
-            <Col span={6} key={item.id}>
+            <Col
+              style={item._hidden ? { display: 'none' } : {}}
+              span={6}
+              key={item.id}
+            >
               <WidgetWrapper
-                {...{ key: item.id, index, data: item, moveCard }}
+                {...{ key: item.id, index, data: item, moveCard, updateCard }}
               />
             </Col>
           );
