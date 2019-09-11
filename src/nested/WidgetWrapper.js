@@ -10,12 +10,19 @@ import ItemTypes from '../ItemTypes';
 //   backgroundColor: 'white',
 //   cursor: 'move'
 // };
+function canDrop(dragItem, data) {
+  const isEmpty = data.type === '__empty__';
+  // 如果当前是 empty 组件，则可以放入任意组件
+  if (isEmpty) return true;
+  // 否则必须要 pid 相等，即 同级内调换位置
+  return data.pid === dragItem.data.pid;
+}
 
 const WidgetWrapper = ({ index, data, moveCard }) => {
   const ref = useRef(null);
   // console.log('WidgetWrapper', data);
 
-  const { id, text, pid } = data;
+  const { id, name, pid } = data;
 
   const [, drop] = useDrop({
     accept: ItemTypes.CARD,
@@ -23,6 +30,7 @@ const WidgetWrapper = ({ index, data, moveCard }) => {
       const isOver = monitor.isOver({ shallow: true });
 
       // console.log('hover-Widget', item, isOver);
+      if (!canDrop(item, data)) return;
 
       if (!isOver) return;
 
@@ -30,8 +38,8 @@ const WidgetWrapper = ({ index, data, moveCard }) => {
 
       const dragIndex = item.index;
       const hoverIndex = index;
-      const dragId = item.data.id;
-      const hoverId = id;
+      // const dragId = item.data.id;
+      // const hoverId = id;
       const dragType = item.data.pid;
       const hoverType = pid;
       const dragCard = item.data;
@@ -45,7 +53,7 @@ const WidgetWrapper = ({ index, data, moveCard }) => {
 
       // Time to actually perform the action
       // console.log('index,index', item.index, hoverIndex);
-      moveCard(dragIndex, hoverIndex, dragId, hoverId, dragCard, hoverCard);
+      moveCard(dragCard, hoverCard);
 
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
@@ -55,15 +63,15 @@ const WidgetWrapper = ({ index, data, moveCard }) => {
       item.data.pid = hoverType;
     },
     drop(item) {
-      // onDrop(item, item.originType);
+      console.log('drop', item);
     }
-    // drop(item, monitor) {
-    //   console.log('drop', index, item.data, data);
+    // canDrop(item, monitor) {
+    //   return canDrop(item, data);
     // }
   });
 
   const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.CARD, index, data },
+    item: { type: ItemTypes.CARD, id, index, data },
     collect: monitor => ({
       isDragging: monitor.isDragging()
     }),
@@ -72,15 +80,19 @@ const WidgetWrapper = ({ index, data, moveCard }) => {
     },
     end(item, monitor) {
       // console.log('end', item.data, data);
+    },
+    canDrag(monitor) {
+      // empty 组件不能拖拽
+      return data.type !== '__empty__';
     }
   });
 
-  const opacity = isDragging ? 0 : 1;
+  // const opacity = isDragging ? 0 : 1;
   drag(drop(ref));
 
   return (
     <div className='grid-widget-item' ref={ref}>
-      {text}
+      {name}
     </div>
   );
 };
