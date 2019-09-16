@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import ItemTypes from '../ItemTypes';
 import DragTypes from '../DragTypes';
 import * as components from './components';
+import { canDrop } from './utils';
 
 function WidgetWrapper({ index, data, moveCard, updateCard }) {
   const ref = useRef(null);
@@ -18,12 +19,14 @@ function WidgetWrapper({ index, data, moveCard, updateCard }) {
     hover(item, monitor) {
       const isOver = monitor.isOver({ shallow: true });
 
-      // console.log('hover-Widget', item, isOver);
-      //   if (!canDrop(item, data)) return;
+      console.log('canDrop', canDrop(item, data));
+      if (!canDrop(item, data)) return;
 
       if (!isOver) return;
 
       if (!ref.current) return;
+
+      return;
 
       const dragIndex = item.index;
       const hoverIndex = index;
@@ -51,9 +54,13 @@ function WidgetWrapper({ index, data, moveCard, updateCard }) {
       item.index = hoverIndex;
       item.data.pid = hoverType;
     },
-    drop(item) {
-      console.log('drop', item);
-      updateCard();
+    drop(item, monitor) {
+      const isOver = monitor.isOver({ shallow: true });
+      if (!isOver) return;
+
+      if (item.data.id === id) return;
+      console.log('targets-drop-widget', item.data, data);
+      moveCard(item.data, data);
     }
     // canDrop(item, monitor) {
     //   return canDrop(item, data);

@@ -4,20 +4,12 @@ import classNames from 'classnames';
 import ItemTypes from '../ItemTypes';
 import DragTypes from '../DragTypes';
 import * as components from './components';
-
-function canDrop(dragItem, data) {
-  if (['grid'].includes(dragItem.data.type)) return false;
-  const isEmpty = data.type === '__empty__';
-  // 如果当前是 empty 组件，则可以放入任意组件
-  if (isEmpty) return true;
-  // 否则必须要 pid 相等，即 同级内调换位置
-  return data.pid === dragItem.data.pid;
-}
+import { canDrop } from './utils';
 
 const CellWrapper = ({ index, data, moveCard, updateCard }) => {
   const ref = useRef(null);
 
-  const { id, name, pid } = data;
+  const { id, pid } = data;
 
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
@@ -27,12 +19,14 @@ const CellWrapper = ({ index, data, moveCard, updateCard }) => {
     hover(item, monitor) {
       const isOver = monitor.isOver({ shallow: true });
 
-      console.log('hover-Widget1212121', isOver);
+      console.log('canDrop', canDrop(item, data));
       if (!canDrop(item, data)) return;
 
       if (!isOver) return;
 
       if (!ref.current) return;
+
+      return;
 
       const dragIndex = item.index;
       const hoverIndex = index;
@@ -60,9 +54,14 @@ const CellWrapper = ({ index, data, moveCard, updateCard }) => {
       item.index = hoverIndex;
       item.data.pid = hoverType;
     },
-    drop(item) {
-      console.log('drop', item);
-      updateCard();
+    drop(item, monitor) {
+      const isOver = monitor.isOver({ shallow: true });
+
+      if (!isOver) return;
+
+      if (item.data.id === id) return;
+      console.log('targets-drop-cell', item.data, data);
+      moveCard(item.data, data);
     }
     // canDrop(item, monitor) {
     //   return canDrop(item, data);

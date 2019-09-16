@@ -1,9 +1,9 @@
-import 'antd/dist/antd.css';
+// import 'antd/dist/antd.css';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 // import ReactDOM from 'ReactDOM';
 // import logo from './logo.svg';
-import './App.css';
+import './App.less';
 // import './App.less';
 import update from 'immutability-helper';
 import { Row, Col, Tabs, Icon } from 'antd';

@@ -4,6 +4,7 @@ import update from 'immutability-helper';
 import { Button } from 'antd';
 import GridWrapper from './GridWrapper';
 import WidgetWrapper from './WidgetWrapper';
+import Card from './Card';
 
 const rawData = [
   {
@@ -26,11 +27,12 @@ const rawData = [
         pid: '185',
         type: 'input',
         name: '单行文本2',
-        icon: 'icon-input'
+        icon: 'icon-input',
+        options: [{}]
       }
     ]
   },
-
+  { id: '1857', type: 'input', name: '单行文本3', icon: 'icon-input' },
   {
     id: '187',
     type: 'grid',
@@ -45,13 +47,7 @@ const rawData = [
         name: '__empty__',
         icon: 'icon-input'
       },
-      {
-        id: '1874',
-        pid: '187',
-        type: 'input',
-        name: '单行文本33'
-        // icon: 'icon-input'
-      },
+      { id: '1874', pid: '187', type: 'input', name: '单行文本33' },
       {
         id: '1876',
         pid: '187',
@@ -60,18 +56,21 @@ const rawData = [
         icon: 'icon-input'
       }
     ]
-  },
-  { id: '1857', type: 'input', name: '单行文本3', icon: 'icon-input' }
+  }
 ];
 
-function empty(pid) {
+const newId = () => {
+  return Math.random()
+    .toString(16)
+    .slice(2);
+};
+
+function createEemptyCard(pid) {
   return {
-    id: Math.random()
-      .toString(16)
-      .slice(2),
+    id: newId(),
     name: 'empty',
-    pid,
-    type: '__empty__'
+    type: '__empty__',
+    pid
   };
 }
 
@@ -113,51 +112,34 @@ function buildCommand(pos, action) {
   }, {});
 }
 
+function checkIsSameParent(from, to) {
+  if (from.length !== to.length) return false;
+  if (from.length === to.length && from.length === 1) return true;
+
+  const arr1 = from.slice(0, -1);
+  const arr2 = to.slice(0, -1);
+  let parentIsSame = true;
+  for (let i = 0; i < arr1.length; i++) {
+    // console.log('item');
+    if (arr1[i] !== arr2[i]) {
+      parentIsSame = false;
+      break;
+    }
+  }
+
+  return parentIsSame;
+}
+
 const keyPositions = rawData2KeyPos(rawData);
 
 // console.log('keyPositions', updateData(d));
 
-function Nested({ data }) {
+function Targets({ data }) {
   const [cards, setCards] = useState(rawData);
   const [keyPos, setKeyPos] = useState(keyPositions);
   const [selectMap, setSelectCard] = useState({});
   //   treeData2KeyPos(treeData)
-  const switchCard = () => {
-    // const dragParentCard = cards[0];
-    // const hoverParentCard = cards[1];
 
-    const dragCard = cards[0].elements[1];
-    const hoverCard = cards[1].elements[1];
-
-    const nextDragCard = {
-      ...hoverCard,
-      pid: dragCard.pid /*id: dragCard.id*/
-    };
-    const nextHoverCard = {
-      ...dragCard,
-      pid: hoverCard.pid /*id: hoverCard.id */
-    };
-
-    const nextCards = update(cards, {
-      0: {
-        elements: {
-          // [2]: { $merge: { _hidden: true } },
-          $splice: [[1, 1, nextDragCard]]
-        }
-      },
-      1: {
-        elements: {
-          $splice: [[1, 1, nextHoverCard]]
-        }
-      }
-    });
-
-    // setCards(nextCards);
-    const nextKeyPos = rawData2KeyPos(nextCards);
-
-    setCards(nextCards);
-    setKeyPos(nextKeyPos);
-  };
   const selectCard = id => {
     setSelectCard(prev => ({ [id]: !prev[id] }));
   };
@@ -172,37 +154,37 @@ function Nested({ data }) {
 
   const moveCard = useCallback(
     (dragCard, hoverCard) => {
-      return ;
       // switchCard();
       // return;
       // console.log('dragCard|hoverCard', dragCard, hoverCard);
-      const dragPos = keyPos[dragCard.id];
+
+      const dragPos = keyPos[dragCard.id] || [cards.length];
       const hoverPos = keyPos[hoverCard.id];
-      const dragParentIsGrid = cards[dragPos[0]].type === 'grid';
+      const dragParentIsGrid = (cards[dragPos[0]] || {}).type === 'grid';
       const hoverParentIsGrid = cards[hoverPos[0]].type === 'grid';
       const hoverIsEmpty = hoverParentIsGrid && hoverCard.type === '__empty__';
 
-      // 注意：元素被 hover 时不能被删除，否则会报 Expected to find a valid target. 错误，
-
+      let command = [];
       const dragCommand = buildCommand(dragPos, i => {
         // 如果父级是 grid 组件，drag 过去之后要补一个 empty 对象
-        const needInsertEmpty = dragParentIsGrid && hoverIsEmpty;
-        const emptyCard = empty(dragCard.pid);
-        return {
-          $splice: [[i, 1, ...(needInsertEmpty ? [emptyCard] : [])]]
-        };
+        const needInsertEmpty = dragParentIsGrid && dragCard.type !== 'grid';
+        const emptyCard = createEemptyCard(dragCard.pid);
+        command = [i, 1, ...(needInsertEmpty ? [emptyCard] : [])];
+
+        return { $splice: [command] };
       });
 
       const hoverCommand = buildCommand(hoverPos, i => {
         // 如果父级是 grid 组件，hoverCard 是 empty 组件，
         // 则把该 empty 组件移除后再把 dragCard 插入该位置
         const newCard = { ...dragCard, pid: hoverCard.pid };
-
+        const isSameParent = checkIsSameParent(dragPos, hoverPos);
+        console.log('isSameParent', isSameParent);
         return {
-          // 解决报 Expected to find a valid target. 错误的问题
-          // 解决方法：hover 时先不删该对象，先隐藏起来，drop 后在统一删除
-          ...(hoverIsEmpty ? { [i]: { $merge: { _hidden: true } } } : {}),
-          $splice: [[i, 0, newCard]]
+          $splice: [
+            ...(isSameParent ? [command] : []),
+            [i, hoverIsEmpty ? 1 : 0, newCard]
+          ]
         };
       });
 
@@ -211,12 +193,20 @@ function Nested({ data }) {
         dragParentIsGrid,
         JSON.stringify(dragCommand),
         JSON.stringify(hoverCommand),
+        { merge: JSON.stringify({ ...dragCommand, ...hoverCommand }) },
+
         dragPos,
         hoverCard
+        // { $splice: [[1, 1]] },
+        // { $splice: [[0, 1, {}]] }
       );
       // return;
 
-      const nextCards = update(update(cards, dragCommand), hoverCommand);
+      const nextCards = update(cards, { ...dragCommand, ...hoverCommand });
+      // const nextCards = update(
+      //   update(cards, dragCommand),
+      //   hoverCommand
+      // );
       // if (hoverIsEmpty) nextCards = update(nextCards, hoverCommand1);
       // nextCards = update(nextCards, hoverCommand);
       const nextKeyPos = rawData2KeyPos(nextCards);
@@ -229,7 +219,7 @@ function Nested({ data }) {
     [cards, keyPos]
   );
 
-  // console.log('nextCardsnextCards', keyPos, cards);
+  console.log('nextCardsnextCards', keyPos, cards);
   return (
     <>
       {cards.map((item, index) => {
@@ -262,18 +252,49 @@ function Nested({ data }) {
           ></WidgetWrapper>
         );
       })}
-      <div style={{ textAlign: 'center' }}>
+      <div className='btn-list'>
+        <Card
+          data={{ ...createEemptyCard(), type: 'input', name: '单行文本' }}
+        />
+        {/* <Button
+          type='primary'
+          onClick={() => {
+            // switchCard();
+            test_cell_move_to_cell();
+          }}
+        >
+          test_cell_move_to_cell
+        </Button>
         <Button
           type='primary'
           onClick={() => {
-            switchCard();
+            // switchCard();
+            test_cell_move_to_cell1();
           }}
         >
-          SwitchCard
+          test_cell_move_to_cell1
         </Button>
+        <Button
+          type='primary'
+          onClick={() => {
+            // switchCard();
+            test_cell_move_out();
+          }}
+        >
+          test_cell_move_out
+        </Button>
+        <Button
+          type='primary'
+          onClick={() => {
+            // switchCard();
+            test_move_in_cell();
+          }}
+        >
+          test_move_in_cell
+        </Button> */}
       </div>
     </>
   );
 }
 
-export default Nested;
+export default Targets;

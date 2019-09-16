@@ -4,16 +4,8 @@ import classNames from 'classnames';
 import { Row, Col, Icon } from 'antd';
 import ItemTypes from '../ItemTypes';
 import DragTypes from '../DragTypes';
-// import { from } from 'rxjs';
+import { canDrop } from './utils';
 import CellWrapper from './CellWrapper';
-
-// const style = {
-//   border: '1px dashed gray',
-//   // padding: '0.5rem 1rem',
-//   // marginBottom: '.5rem',
-//   backgroundColor: 'white',
-//   cursor: 'move'
-// };
 
 const GridWrapper = ({
   index,
@@ -36,13 +28,16 @@ const GridWrapper = ({
     hover(item, monitor) {
       const isOver = monitor.isOver({ shallow: true });
 
-      // console.log('hover-Widget', item, isOver);
-      // if (!canDrop(item, data)) return;
+      console.log('canDrop', canDrop(item, data));
+      if (!canDrop(item, data)) return;
+
       if (item.dragType === DragTypes.GRID_COL) return false;
 
       if (!isOver) return;
 
       if (!ref.current) return;
+
+      return;
 
       const dragIndex = item.index;
       const hoverIndex = index;
@@ -78,11 +73,16 @@ const GridWrapper = ({
       // to avoid expensive index searches.
       item.index = hoverIndex;
       item.data.pid = hoverType;
+    },
+
+    drop(item, monitor) {
+      const isOver = monitor.isOver({ shallow: true });
+      if (!isOver) return;
+
+      if (item.data.id === id) return;
+      console.log('targets-drop-grid', item.data, data);
+      moveCard(item.data, data);
     }
-    // drop(item) {
-    //   console.log('drop', item);
-    //   // updateCard();
-    // }
     // canDrop(item, monitor) {
     //   return canDrop(item, data);
     // }
@@ -105,10 +105,12 @@ const GridWrapper = ({
   // grid 组件不能放入组件，只有里面的 Col 才能 drag and drop
   // 当 Col 是为空组件时才能放入新组件，否只能拖拽排序
   // 当 Col 不是空组件时，只能排序
-  drop(!selectMap[id] && ref);
-  drag(dragRef);
 
-  console.log(!selectMap[id]);
+  // drop(!selectMap[id] && ref);
+  // drag(dragRef);
+  drag(drop(ref));
+
+  // console.log(!selectMap[id],keyPos);
 
   return (
     <div

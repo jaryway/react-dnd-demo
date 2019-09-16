@@ -1,23 +1,120 @@
-.grid-widget {
+* {
+  box-sizing: border-box;
+}
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+.grid-widget,
+.widget-item {
   margin-bottom: 8px;
   padding: 8px;
   border: 1px dashed #d4d3d1;
   background-color: rgba(253, 246, 236, 0.3);
+  position: relative;
 }
-.grid-widget:hover {
-  border-color: #1890ff;
+.grid-widget .grid-widget-drag {
+  display: none;
 }
-/* 
-  .grid-widget [class~='ant-col'] {
-    
-  } */
-.grid-widget [class~='ant-col'] > div {
+/* .grid-widget.selected {
+  display: block;
+} */
+.grid-widget.selected .grid-widget-drag {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* bottom: -18px; */
+  height: 24px;
+  width: 24px;
+  text-align: center;
+  line-height: 24px;
+  background: #409eff;
+  z-index: 9;
+  color: #fff;
+  cursor: move;
+}
+.grid-widget:hover,
+.grid-widget.selected {
+  border-color: #1890ff; /*#1890ff*/
+}
+.grid-widget .grid-widget-item:hover {
+  border-color: #3f8600;
+}
+.grid-widget-item {
+  position: relative;
+}
+/* .grid-widget.selected > .ant-row::after, */
+.grid-widget-item::after,
+.widget-item::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: block;
+  /* background-color: red; */
+}
+/* .grid-widget:hover {
+
+}
+.grid-widget [class~='ant-col'] {
+  
+} */
+
+.grid-widget [class~='ant-col'] .grid-widget-item {
   /* background: #00a0e9; */
   border: 1px dashed hsla(0, 0%, 66.7%, 0.5);
   min-height: 48px;
   text-align: center;
   /* height: 120px;
-    line-height: 120px; */
+  line-height: 120px; */
   font-size: 13px;
   background-color: rgba(236, 245, 255, 0.3);
 }
+
+.grid-widget.hover,
+.grid-widget .grid-widget-item.hover,
+.widget-item.hover {
+  background-color: #3f8600;
+}
+
+.btn-list {
+  margin: 0;
+  padding: 0;
+  button {
+    float: left;
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+}
+
+// @keyframes App-logo-spin {
+//   from {
+//     transform: rotate(0deg);
+//   }
+//   to {
+//     transform: rotate(360deg);
+//   }
+// }
