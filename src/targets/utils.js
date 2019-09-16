@@ -1,12 +1,15 @@
+import DragTypes from '../DragTypes';
 
 //
 export function canDrop(dragItem, data) {
-  if (['grid'].includes(dragItem.data.type)) return false;
+  const { dragType, data: dragData } = dragItem;
+
+  if (['grid'].includes(dragData.type)) return false;
   const isEmpty = data.type === '__empty__';
   // 如果当前是 empty 组件，则可以放入任意组件
   if (isEmpty) return true;
   // 否则必须要 pid 相等，即 同级内调换位置
-  return data.pid === dragItem.data.pid;
+  return data.pid === dragItem.data.pid && dragType !== DragTypes.GRID_COL;
 }
 
 // export function canDrop(dragItem, data) {
@@ -112,4 +115,3 @@ export function canDrop(dragItem, data) {
 //   setCards(nextCards);
 //   setKeyPos(nextKeyPos);
 // };
-

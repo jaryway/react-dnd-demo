@@ -3,8 +3,8 @@ import { useDrag, useDrop } from 'react-dnd';
 import classNames from 'classnames';
 import { Row, Col, Icon } from 'antd';
 import ItemTypes from '../ItemTypes';
-import DragTypes from '../DragTypes';
-import { canDrop } from './utils';
+// import DragTypes from '../DragTypes';
+// import { canDrop } from './utils';
 import CellWrapper from './CellWrapper';
 
 const GridWrapper = ({
@@ -18,61 +18,14 @@ const GridWrapper = ({
   const ref = useRef(null);
   const dragRef = useRef(null);
   // console.log('RowWrapper', data);
-  const { id, elements, pid } = data;
+  const { id, elements } = data;
 
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
-    collect: monitor => ({
-      isOver: monitor.isOver({ shallow: true })
-    }),
-    hover(item, monitor) {
+    collect: monitor => {
+      const item = monitor.getItem();
       const isOver = monitor.isOver({ shallow: true });
-
-      console.log('canDrop', canDrop(item, data));
-      if (!canDrop(item, data)) return;
-
-      if (item.dragType === DragTypes.GRID_COL) return false;
-
-      if (!isOver) return;
-
-      if (!ref.current) return;
-
-      return;
-
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      // const dragId = item.data.id;
-      // const hoverId = id;
-      const dragType = item.data.pid;
-      const hoverType = pid;
-      const dragCard = item.data;
-      const hoverCard = data;
-
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
-      const { bottom, top } = hoverBoundingRect;
-      const hoverMiddleY = (bottom - top) / 2; // 得到中线的位置
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset.y - top;
-
-      // 通过鼠标在当前元素位置来判断是要向前一位还是后一位插入元素
-
-      // monitor is DropTargetMonitor getItem 返回 drag 对象的 item
-      // console.log(90909, dragIndex === hoverIndex);
-      // Don't replace items with themselves
-      if (dragIndex === hoverIndex && dragType === hoverType) return;
-
-      // console.log('hover', index, item.data, data);
-
-      // Time to actually perform the action
-      // console.log('index,index', item.index, hoverIndex);
-      moveCard(dragCard, hoverCard);
-
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
-      item.index = hoverIndex;
-      item.data.pid = hoverType;
+      return { isOver: isOver && item.id !== data.id };
     },
 
     drop(item, monitor) {
@@ -88,7 +41,7 @@ const GridWrapper = ({
     // }
   });
 
-  const [{ isDragging }, drag] = useDrag({
+  const [, drag] = useDrag({
     item: { type: ItemTypes.CARD, id, index, data },
     collect: monitor => ({
       isDragging: monitor.isDragging()

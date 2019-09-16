@@ -6,8 +6,8 @@ import React, { useState, useCallback } from 'react';
 import './App.less';
 // import './App.less';
 import update from 'immutability-helper';
-import { Row, Col, Tabs, Icon } from 'antd';
-import Tree from 'antd/lib/tree';
+import { Row, Col, Tabs, Tree } from 'antd';
+// import Tree from 'antd/lib/tree';
 
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';

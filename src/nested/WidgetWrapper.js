@@ -1,15 +1,15 @@
 import React, { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import ItemTypes from '../ItemTypes';
-import DragTypes from '../DragTypes';
+// import DragTypes from '../DragTypes';
 import * as components from './components';
 
 function WidgetWrapper({ index, data, moveCard, updateCard }) {
   const ref = useRef(null);
 
-  const { id, name, pid } = data;
+  const { id, pid } = data;
 
-  const [{ isOver }, drop] = useDrop({
+  const [, drop] = useDrop({
     accept: ItemTypes.CARD,
     collect: monitor => ({
       isOver: monitor.isOver({ shallow: true })
@@ -60,7 +60,7 @@ function WidgetWrapper({ index, data, moveCard, updateCard }) {
   });
 
   const dragItem = { id, index, data };
-  const [{ isDragging }, drag] = useDrag({
+  const [, drag] = useDrag({
     item: { ...dragItem, type: ItemTypes.CARD },
     collect: monitor => ({
       isDragging: monitor.isDragging()

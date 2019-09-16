@@ -28,7 +28,7 @@ const GridWrapper = ({
   // console.log('RowWrapper', data);
   const { id, elements, pid } = data;
 
-  const [{ isOver }, drop] = useDrop({
+  const [, drop] = useDrop({
     accept: ItemTypes.CARD,
     collect: monitor => ({
       isOver: monitor.isOver({ shallow: true })
@@ -79,7 +79,7 @@ const GridWrapper = ({
     // }
   });
 
-  const [{ isDragging }, drag] = useDrag({
+  const [, drag] = useDrag({
     item: { type: ItemTypes.CARD, id, index, data },
     collect: monitor => ({
       isDragging: monitor.isDragging()

@@ -18,9 +18,9 @@ function canDrop(dragItem, data) {
 const CellWrapper = ({ index, data, moveCard, updateCard }) => {
   const ref = useRef(null);
 
-  const { id, name, pid } = data;
+  const { id, pid } = data;
 
-  const [{ isOver }, drop] = useDrop({
+  const [, drop] = useDrop({
     accept: ItemTypes.CARD,
     collect: monitor => ({
       isOver: monitor.isOver({ shallow: true })
@@ -71,7 +71,7 @@ const CellWrapper = ({ index, data, moveCard, updateCard }) => {
   });
 
   const dragItem = { id, index, data };
-  const [{ isDragging }, drag] = useDrag({
+  const [, drag] = useDrag({
     item: { ...dragItem, type: ItemTypes.CARD, dragType: DragTypes.GRID_COL },
     collect: monitor => ({
       isDragging: monitor.isDragging()
@@ -82,7 +82,7 @@ const CellWrapper = ({ index, data, moveCard, updateCard }) => {
     // end(item, monitor) {
     //   // console.log('end', item.data, data);
     // },
-    canDrag(monitor) {
+    canDrag() {
       // empty 组件不能拖拽
       return data.type !== '__empty__';
     }
