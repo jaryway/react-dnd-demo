@@ -1,10 +1,21 @@
 import React, { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
+
 import ItemTypes from '../ItemTypes';
 import DragTypes from '../DragTypes';
 import * as components from './components';
 
-function WidgetWrapper({ index, data, moveCard, updateCard }) {
+
+function canDrop(dragItem, data) {
+  if (['grid'].includes(dragItem.data.type)) return false;
+  const isEmpty = data.type === '__empty__';
+  // 如果当前是 empty 组件，则可以放入任意组件
+  if (isEmpty) return true;
+  // 否则必须要 pid 相等，即 同级内调换位置
+  return data.pid === dragItem.data.pid;
+}
+
+const CellWrapper = ({ index, data, moveCard, updateCard }) => {
   const ref = useRef(null);
 
   const { id, name, pid } = data;
@@ -18,7 +29,7 @@ function WidgetWrapper({ index, data, moveCard, updateCard }) {
       const isOver = monitor.isOver({ shallow: true });
 
       // console.log('hover-Widget', item, isOver);
-      //   if (!canDrop(item, data)) return;
+      if (!canDrop(item, data)) return;
 
       if (!isOver) return;
 
@@ -61,32 +72,32 @@ function WidgetWrapper({ index, data, moveCard, updateCard }) {
 
   const dragItem = { id, index, data };
   const [{ isDragging }, drag] = useDrag({
-    item: { ...dragItem, type: ItemTypes.CARD },
+    item: { ...dragItem, type: ItemTypes.CARD, dragType: DragTypes.GRID_COL },
     collect: monitor => ({
       isDragging: monitor.isDragging()
-    })
+    }),
     // begin(monitor) {
     //   // console.log('begin', data);
     // },
     // end(item, monitor) {
     //   // console.log('end', item.data, data);
     // },
-    // canDrag(monitor) {
-    //   // empty 组件不能拖拽
-    //   return data.type !== '__empty__';
-    // }
+    canDrag(monitor) {
+      // empty 组件不能拖拽
+      return data.type !== '__empty__';
+    }
   });
 
   // const opacity = isDragging ? 0 : 1;
   drag(drop(ref));
 
+  // console.log(isOvering, 'collectedProps');
   const WidgetComponent = components[data.type];
 
   return (
-    <div className='widget-item' ref={ref}>
+    <div className='grid-widget-item' ref={ref}>
       {WidgetComponent && <WidgetComponent data={data} />}
     </div>
   );
-}
-
-export default WidgetWrapper;
+};
+export default CellWrapper;

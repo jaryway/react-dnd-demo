@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
+import classNames from 'classnames';
 import ItemTypes from '../ItemTypes';
 import DragTypes from '../DragTypes';
 import * as components from './components';
@@ -83,7 +84,7 @@ function WidgetWrapper({ index, data, moveCard, updateCard }) {
   const WidgetComponent = components[data.type];
 
   return (
-    <div className='widget-item' ref={ref}>
+    <div className={classNames('widget-item', { hover: isOver })} ref={ref}>
       {WidgetComponent && <WidgetComponent data={data} />}
     </div>
   );

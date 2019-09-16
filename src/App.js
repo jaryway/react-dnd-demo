@@ -14,8 +14,8 @@ import { DndProvider } from 'react-dnd';
 
 // import DragSourceWrapper from './DragSourceWrapper';
 import Example from './Example';
-import Nested from './nested'
-
+import Nested from './nested';
+import Targets from './targets';
 
 // const data = [
 //   'Racing car sprays burning fuel into crowd.',
@@ -239,7 +239,7 @@ function App() {
       {/* <Form /> */}
       <DndProvider backend={HTML5Backend}>
         <div className='app' style={{ margin: '24px auto', maxWidth: 900 }}>
-          <Tabs defaultActiveKey='3'>
+          <Tabs defaultActiveKey='Targets'>
             <Tabs.TabPane tab='Two Lists' key='1'>
               <Row gutter={16} style={{ marginLeft: '0', marginRight: 0 }}>
                 <Col md={6}>
@@ -312,6 +312,24 @@ function App() {
                   </Col>
                 </Row>
               </div> */}
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='Targets' key='Targets'>
+              <Targets className='grid-widget'>
+                <Row gutter={2}>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                  <Col span={6}>
+                    <div>Column</div>
+                  </Col>
+                </Row>
+              </Targets>
             </Tabs.TabPane>
             <Tabs.TabPane tab='Tree' key={4}>
               <Tree

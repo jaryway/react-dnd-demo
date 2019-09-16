@@ -36,7 +36,7 @@ const GridWrapper = ({
     hover(item, monitor) {
       const isOver = monitor.isOver({ shallow: true });
 
-      console.log('hover-Widget', item, isOver);
+      // console.log('hover-Widget', item, isOver);
       // if (!canDrop(item, data)) return;
       if (item.dragType === DragTypes.GRID_COL) return false;
 
@@ -52,6 +52,15 @@ const GridWrapper = ({
       const hoverType = pid;
       const dragCard = item.data;
       const hoverCard = data;
+
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const { bottom, top } = hoverBoundingRect;
+      const hoverMiddleY = (bottom - top) / 2; // 得到中线的位置
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = clientOffset.y - top;
+
+      // 通过鼠标在当前元素位置来判断是要向前一位还是后一位插入元素
+
       // monitor is DropTargetMonitor getItem 返回 drag 对象的 item
       // console.log(90909, dragIndex === hoverIndex);
       // Don't replace items with themselves
@@ -104,7 +113,10 @@ const GridWrapper = ({
   return (
     <div
       key={id}
-      className={classNames('grid-widget', { selected: selectMap[id] })}
+      className={classNames('grid-widget', {
+        selected: selectMap[id],
+        hover: isOver
+      })}
       ref={ref}
       onClick={e => {
         e.preventDefault();
