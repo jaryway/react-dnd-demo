@@ -38,7 +38,7 @@ const GridWrapper = ({
 
       console.log('hover-Widget', item, isOver);
       // if (!canDrop(item, data)) return;
-      if (item.dragType === DragTypes.GRID_COL) return false;
+      if (item.dragType === DragTypes.GRID_CELL) return false;
 
       if (!isOver) return;
 

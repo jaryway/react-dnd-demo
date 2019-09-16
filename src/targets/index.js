@@ -6,6 +6,8 @@ import GridWrapper from './GridWrapper';
 import WidgetWrapper from './WidgetWrapper';
 import Card from './Card';
 
+const EMPTY = '__empty__';
+
 const rawData = [
   {
     id: '185',
@@ -21,7 +23,7 @@ const rawData = [
         name: '单行文本1',
         icon: 'icon-input'
       },
-      { id: '12121212121', pid: '185', name: '__empty__', type: '__empty__' },
+      { id: '12121212121', pid: '185', name: EMPTY, type: EMPTY },
       {
         id: '1856',
         pid: '185',
@@ -43,8 +45,8 @@ const rawData = [
       {
         id: '1855',
         pid: '187',
-        type: '__empty__',
-        name: '__empty__',
+        type: EMPTY,
+        name: EMPTY,
         icon: 'icon-input'
       },
       { id: '1874', pid: '187', type: 'input', name: '单行文本33' },
@@ -69,7 +71,7 @@ function createEemptyCard(pid) {
   return {
     id: newId(),
     name: 'empty',
-    type: '__empty__',
+    type: EMPTY,
     pid
   };
 }
@@ -160,45 +162,49 @@ function Targets({ data }) {
 
       const dragPos = keyPos[dragCard.id] || [cards.length];
       const hoverPos = keyPos[hoverCard.id];
-      const dragParentIsGrid = (cards[dragPos[0]] || {}).type === 'grid';
-      const hoverParentIsGrid = cards[hoverPos[0]].type === 'grid';
-      const hoverIsEmpty = hoverParentIsGrid && hoverCard.type === '__empty__';
+      const dragParent = cards[dragPos[0]] || {};
+      const hoverParent = cards[hoverPos[0]] || {};
+      const dragIsGridCell =
+        dragParent.type === 'grid' && dragCard.type !== 'grid';
+      const hoverIsGridCell =
+        hoverParent.type === 'grid' && hoverCard.type !== 'grid';
+      const hoverIsEmptyCell = hoverIsGridCell && hoverCard.type === EMPTY;
+      const isSameParent = checkIsSameParent(dragPos, hoverPos);
 
       let command = [];
       const dragCommand = buildCommand(dragPos, i => {
-        // 如果父级是 grid 组件，drag 过去之后要补一个 empty 对象
-        const needInsertEmpty = dragParentIsGrid && dragCard.type !== 'grid';
+        // 如果 drag 对象是 grid cell 对象，则移除之后,没有填充对象，则填充 empty 对象;
+        // 没有填充对象的情况:1、hover 对象是一个 empty cell; 2、从 cell 移出
+        const needInsertEmptyCell =
+          dragIsGridCell && (hoverIsEmptyCell || !hoverIsGridCell);
         const emptyCard = createEemptyCard(dragCard.pid);
-        command = [i, 1, ...(needInsertEmpty ? [emptyCard] : [])];
+        command = [i, 1, ...(needInsertEmptyCell ? [emptyCard] : [])];
 
         return { $splice: [command] };
       });
 
       const hoverCommand = buildCommand(hoverPos, i => {
-        // 如果父级是 grid 组件，hoverCard 是 empty 组件，
+        // 如果 hover 对象是 grid cell 对象，
         // 则把该 empty 组件移除后再把 dragCard 插入该位置
         const newCard = { ...dragCard, pid: hoverCard.pid };
-        const isSameParent = checkIsSameParent(dragPos, hoverPos);
-        console.log('isSameParent', isSameParent);
+        // console.log('isSameParent', isSameParent, hoverIsEmpty);
         return {
           $splice: [
             ...(isSameParent ? [command] : []),
-            [i, hoverIsEmpty ? 1 : 0, newCard]
+            [i, hoverIsEmptyCell ? 1 : 0, newCard]
           ]
         };
       });
 
       console.log(
         'dragCommand',
-        dragParentIsGrid,
+        // dragParentIsGrid,
         JSON.stringify(dragCommand),
         JSON.stringify(hoverCommand),
         { merge: JSON.stringify({ ...dragCommand, ...hoverCommand }) },
 
         dragPos,
         hoverCard
-        // { $splice: [[1, 1]] },
-        // { $splice: [[0, 1, {}]] }
       );
       // return;
 

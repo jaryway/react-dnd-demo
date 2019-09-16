@@ -1,1 +1,1 @@
-export default { GRID_COL: 'gridCol', GRID: 'grid' };
+export default { GRID_CELL: 'gridCell', GRID: 'grid' };

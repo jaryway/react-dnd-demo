@@ -1,15 +1,15 @@
-import DragTypes from '../DragTypes';
+// import DragTypes from '../DragTypes';
 
 //
 export function canDrop(dragItem, data) {
-  const { dragType, data: dragData } = dragItem;
+  const { data: dragData } = dragItem;
 
   if (['grid'].includes(dragData.type)) return false;
   const isEmpty = data.type === '__empty__';
   // 如果当前是 empty 组件，则可以放入任意组件
   if (isEmpty) return true;
   // 否则必须要 pid 相等，即 同级内调换位置
-  return data.pid === dragItem.data.pid && dragType !== DragTypes.GRID_COL;
+  return data.pid === dragItem.data.pid;
 }
 
 // export function canDrop(dragItem, data) {

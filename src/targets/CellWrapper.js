@@ -16,20 +16,9 @@ const CellWrapper = ({ index, data, moveCard, updateCard }) => {
     collect: monitor => {
       const item = monitor.getItem();
       const isOver = monitor.isOver({ shallow: true });
-      return { isOver: isOver && item.id !== data.id };
+      // const dragIsNotCell = item.id !== DragTypes.GRID_CELL;
+      return { isOver: isOver && item.id !== data.id && canDrop(item, data) };
     },
-    // hover(item, monitor) {
-    //   const isOver = monitor.isOver({ shallow: true });
-
-    //   // console.log('canDrop', canDrop(item, data));
-    //   // if (!canDrop(item, data)) return;
-
-    //   if (!isOver) return;
-
-    //   if (!ref.current) return;
-
-    //   return;
-    // },
     drop(item, monitor) {
       const isOver = monitor.isOver({ shallow: true });
 
@@ -38,25 +27,18 @@ const CellWrapper = ({ index, data, moveCard, updateCard }) => {
       if (item.data.id === id) return;
 
       console.log('targets-drop-cell', item.data, data);
-      moveCard(item.data, data);
+      moveCard(item.data, data, item.dragType);
     },
     canDrop(item) {
+      // return true;
       return canDrop(item, data);
     }
   });
 
   const dragItem = { id, index, data };
   const [, drag] = useDrag({
-    item: { ...dragItem, type: ItemTypes.CARD, dragType: DragTypes.GRID_COL },
-    collect: monitor => ({
-      isDragging: monitor.isDragging()
-    }),
-    // begin(monitor) {
-    //   // console.log('begin', data);
-    // },
-    // end(item, monitor) {
-    //   // console.log('end', item.data, data);
-    // },
+    item: { ...dragItem, type: ItemTypes.CARD, dragType: DragTypes.GRID_CELL },
+    collect: monitor => ({ isDragging: monitor.isDragging() }),
     canDrag() {
       // empty 组件不能拖拽
       return data.type !== '__empty__';

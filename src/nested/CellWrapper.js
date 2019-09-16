@@ -72,7 +72,7 @@ const CellWrapper = ({ index, data, moveCard, updateCard }) => {
 
   const dragItem = { id, index, data };
   const [, drag] = useDrag({
-    item: { ...dragItem, type: ItemTypes.CARD, dragType: DragTypes.GRID_COL },
+    item: { ...dragItem, type: ItemTypes.CARD, dragType: DragTypes.GRID_CELL },
     collect: monitor => ({
       isDragging: monitor.isDragging()
     }),
